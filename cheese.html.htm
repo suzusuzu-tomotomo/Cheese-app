@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>チーズ検定クイズ（試作）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: sans-serif; padding: 1em; background: #f5f5f5; }
+    .question-box { background: #fff; padding: 1em; margin-bottom: 1em; border-radius: 8px; box-shadow: 0 0 5px #ccc; }
+    .choices button { display: block; width: 100%; margin: 0.3em 0; padding: 0.6em; }
+    .result { margin-top: 1em; font-weight: bold; }
+    .status { font-size: 0.9em; color: #555; margin-bottom: 1em; }
+  </style>
+</head>
+<body>
+
+  <h1>チーズ検定クイズ（試作）</h1>
+  <div class="status" id="status"></div>
+  <div class="question-box">
+    <div id="question"></div>
+    <div class="choices" id="choices"></div>
+    <div class="result" id="result"></div>
+    <div id="explanation" style="margin-top:0.5em;"></div>
+    <button onclick="nextQuestion()">次の問題へ</button>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        question: "カマンベールはどこの国のチーズ？",
+        choices: ["フランス", "イタリア", "スイス", "ドイツ"],
+        answer: 0,
+        explanation: "カマンベールはフランス・ノルマンディー地方原産の白カビチーズです。"
+      },
+      {
+        question: "ロックフォールは何タイプのチーズ？",
+        choices: ["白カビ", "青カビ", "ウォッシュ", "非加熱圧搾"],
+        answer: 1,
+        explanation: "ロックフォールはフランスの羊乳製の青カビチーズです。"
+      },
+      {
+        question: "パルミジャーノ・レッジャーノはどこの国？",
+        choices: ["フランス", "スペイン", "イタリア", "ベルギー"],
+        answer: 2,
+        explanation: "パルミジャーノ・レッジャーノはイタリアのハードチーズ。長期熟成が特徴です。"
+      },
+      {
+        question: "ミモレットは何色？",
+        choices: ["白", "青", "オレンジ", "茶色"],
+        answer: 2,
+        explanation: "ミモレットはアナトーで着色されたオレンジ色のチーズ。フランス北部が産地。"
+      },
+      {
+        question: "コンテは何タイプ？",
+        choices: ["非加熱圧搾", "加熱圧搾", "青カビ", "ウォッシュ"],
+        answer: 1,
+        explanation: "コンテは加熱圧搾タイプ。ジュラ地方の代表的なハードチーズです。"
+      },
+      {
+        question: "ブリー・ド・モーの熟成期間は？",
+        choices: ["1週間", "2週間", "4～8週間", "半年以上"],
+        answer: 2,
+        explanation: "ブリー・ド・モーは白カビタイプで、4～8週間の熟成が一般的です。"
+      },
+      {
+        question: "ゴルゴンゾーラはどこの国？",
+        choices: ["イタリア", "ドイツ", "スイス", "オランダ"],
+        answer: 0,
+        explanation: "ゴルゴンゾーラはイタリアの代表的な青カビチーズです。"
+      },
+      {
+        question: "エポワスの外皮は？",
+        choices: ["塩水で洗う", "マールで洗う", "オイルで洗う", "乾燥させる"],
+        answer: 1,
+        explanation: "エポワスはマール（ブランデー）で洗うウォッシュチーズです。"
+      },
+      {
+        question: "サン・ネクテールの原料乳は？",
+        choices: ["牛乳", "山羊乳", "羊乳", "混乳"],
+        answer: 0,
+        explanation: "サン・ネクテールは牛乳製の非加熱圧搾チーズです。"
+      },
+      {
+        question: "アボンダンスの主な熟成場所は？",
+        choices: ["カーヴ（地下室）", "木の棚", "藁の上", "洞窟"],
+        answer: 3,
+        explanation: "アボンダンスはサヴォワ地方で洞窟熟成される加熱圧搾チーズです。"
+      }
+    ];
+
+    let current = 0;
+    let correct = parseInt(localStorage.getItem('correct') || '0');
+    let total = parseInt(localStorage.getItem('total') || '0');
+
+    function showQuestion() {
+      const q = questions[current];
+      document.getElementById('question').textContent = `Q${current + 1}: ${q.question}`;
+      const choicesDiv = document.getElementById('choices');
+      choicesDiv.innerHTML = '';
+      q.choices.forEach((choice, index) => {
+        const btn = document.createElement('button');
+        btn.textContent = choice;
+        btn.onclick = () => checkAnswer(index);
+        choicesDiv.appendChild(btn);
+      });
+      document.getElementById('result').textContent = '';
+      document.getElementById('explanation').textContent = '';
+      updateStatus();
+    }
+
+    function checkAnswer(selected) {
+      const q = questions[current];
+      const result = document.getElementById('result');
+      const explanation = document.getElementById('explanation');
+      if (selected === q.answer) {
+        result.textContent = '正解！';
+        correct++;
+      } else {
+        result.textContent = `不正解... 正解は「${q.choices[q.answer]}」`;
+      }
+      explanation.textContent = q.explanation;
+      total++;
+      localStorage.setItem('correct', correct);
+      localStorage.setItem('total', total);
+      updateStatus();
+    }
+
+    function nextQuestion() {
+      current = (current + 1) % questions.length;
+      showQuestion();
+    }
+
+    function updateStatus() {
+      const rate = total > 0 ? Math.round((correct / total) * 100) : 0;
+      document.getElementById('status').textContent = `正答率: ${rate}%（${correct}問正解 / ${total}問中）`;
+    }
+
+    showQuestion();
+  </script>
+
+</body>
+</html>
